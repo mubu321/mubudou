@@ -83,7 +83,7 @@
             top: 10px;
             right: 10px;
             z-index: 1000;
-            display: none; /* 初期状態は非表示 */
+            display: block; /* デスクトップでも常に表示 */
         }
         #imageInputLabel, #bgImageInputLabel {
             display: inline-block;
@@ -109,9 +109,6 @@
             }
             .input-container button {
                 font-size: 14px;
-            }
-            .background-setting-area {
-                display: block; /* スマホでは表示する */
             }
         }
     </style>
@@ -229,11 +226,6 @@
     window.onload = function() {
         loadMessages();
         loadBackgroundImage();
-
-        // スマホの場合、背景設定エリアを表示
-        if (/Mobi|Android/i.test(navigator.userAgent)) {
-            document.querySelector('.background-setting-area').style.display = 'block';
-        }
     };
 
     document.getElementById('bgImageInput').addEventListener('change', setBackgroundImage);
