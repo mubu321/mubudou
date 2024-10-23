@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mubudou chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: rgba(47, 49, 54, 0.8);
+        }
+        .message {
+            background-color: #40444b;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            max-width: 60%;
+            word-wrap: break-word;
+            position: relative;
+            color: white;
+        }
+        .message-buttons {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        .message-buttons button {
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #7289da;
+            color: white;
+            cursor: pointer;
+        }
+        .message-buttons button:hover {
+            background-color: #677bc4;
+        }
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #40444b;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2f3136;
+            color: #dcddde;
+        }
+        .input-container button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #7289da;
+            color: white;
+            cursor: pointer;
+        }
+        .input-container button:hover {
+            background-color: #677bc4;
+        }
+        .hidden-input-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .hidden-input-container:hover {
+            opacity: 1;
+        }
+        .background-setting-area {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            z-index: 1000;
+        }
+        #imageInputLabel, #bgImageInputLabel {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background-color: #7289da;
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        #imageInput, #bgImageInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container" id="chatContainer">
+</div>
+
+<div class="input-container">
+    <label id="imageInputLabel" for="imageInput">📷</label>
+    <input type="file" id="imageInput" accept="image/*">
+    <input type="text" id="messageInput" placeholder="メッセージを入力">
+    <button onclick="sendMessage()">送信</button>
+</div>
+
+<div class="background-setting-area">
+    <label id="bgImageInputLabel" for="bgImageInput">🖼️</label>
+    <input type="file" id="bgImageInput" accept="image/*">
+</div>
+
+<script>
+    let editingIndex = null;
+
+    function loadMessages() {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.innerHTML = '';
+        messages.forEach((message, index) => {
+            displayMessage(message, index);
+        });
+    }
+
+    function displayMessage(message, index) {
+        const chatContainer = document.getElementById('chatContainer');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+
+        if (message.isImage) {
+            const imageElement = document.createElement('img');
+            imageElement.src = message.content;
+            imageElement.style.maxWidth = '100%';
+            imageElement.style.borderRadius = '5px';
+            messageElement.appendChild(imageElement);
+        } else {
+            messageElement.innerText = message.content;
+        }
+
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.classList.add('message-buttons');
+        const deleteButton = document.createElement('button');
+        deleteButton.innerText = '削除';
+        deleteButton.onclick = () => deleteMessage(index);
+
+        buttonsContainer.appendChild(deleteButton);
+        messageElement.appendChild(buttonsContainer);
+
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function deleteMessage(index) {
+        const messages = JSON.parse(localStorage.getItem('messages'));
+        messages.splice(index, 1);
+        localStorage.setItem('messages', JSON.stringify(messages));
+        loadMessages();
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const imageInput = document.getElementById('imageInput');
+
+        let message;
+        if (imageInput.files.length > 0) {
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                message = { content: event.target.result, isImage: true };
+                saveMessage(message);
+            };
+            reader.readAsDataURL(file);
+        } else if (messageInput.value.trim() !== '') {
+            message = { content: messageInput.value, isImage: false };
+            saveMessage(message);
+        }
+
+        messageInput.value = '';
+        imageInput.value = '';
+    }
+
+    function saveMessage(message) {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+
+        messages.push(message);
+        localStorage.setItem('messages', JSON.stringify(messages));
+        loadMessages();
+    }
+
+    function setBackgroundImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.body.style.backgroundImage = `url(${e.target.result})`;
+                localStorage.setItem('backgroundImage', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function loadBackgroundImage() {
+        const backgroundImage = localStorage.getItem('backgroundImage');
+        if (backgroundImage) {
+            document.body.style.backgroundImage = `url(${backgroundImage})`;
+        }
+    }
+
+    window.onload = function() {
+        loadMessages();
+        loadBackgroundImage();
+    };
+
+    document.getElementById('bgImageInput').addEventListener('change', setBackgroundImage);
+</script>
+
+</body>
+</html>
+
