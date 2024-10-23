@@ -83,6 +83,7 @@
             top: 10px;
             right: 10px;
             z-index: 1000;
+            display: none; /* 初期状態は非表示 */
         }
         #imageInputLabel, #bgImageInputLabel {
             display: inline-block;
@@ -110,12 +111,7 @@
                 font-size: 14px;
             }
             .background-setting-area {
-                display: block;
-            }
-        }
-        @media (min-width: 601px) {
-            .background-setting-area {
-                display: none;
+                display: block; /* スマホでは表示する */
             }
         }
     </style>
@@ -234,7 +230,7 @@
         loadMessages();
         loadBackgroundImage();
 
-        // スマホの場合、特定のスタイルや機能を適用
+        // スマホの場合、背景設定エリアを表示
         if (/Mobi|Android/i.test(navigator.userAgent)) {
             document.querySelector('.background-setting-area').style.display = 'block';
         }
