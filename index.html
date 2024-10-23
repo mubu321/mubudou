@@ -28,7 +28,7 @@
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
-            max-width: 60%;
+            max-width: 80%;
             word-wrap: break-word;
             position: relative;
             color: white;
@@ -56,13 +56,14 @@
             padding: 10px;
             background-color: #40444b;
         }
-        .input-container input {
+        .input-container input[type="text"] {
             flex: 1;
             padding: 10px;
             border: none;
             border-radius: 5px;
             background-color: #2f3136;
             color: #dcddde;
+            font-size: 16px;
         }
         .input-container button {
             margin-left: 10px;
@@ -72,26 +73,15 @@
             background-color: #7289da;
             color: white;
             cursor: pointer;
+            font-size: 16px;
         }
         .input-container button:hover {
             background-color: #677bc4;
         }
-        .hidden-input-container {
+        .background-setting-area {
             position: fixed;
             top: 10px;
             right: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .hidden-input-container:hover {
-            opacity: 1;
-        }
-        .background-setting-area {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 50px;
-            height: 50px;
             z-index: 1000;
         }
         #imageInputLabel, #bgImageInputLabel {
@@ -108,6 +98,25 @@
         }
         #imageInput, #bgImageInput {
             display: none;
+        }
+        @media (max-width: 600px) {
+            .message {
+                max-width: 90%;
+            }
+            .input-container input[type="text"] {
+                font-size: 14px;
+            }
+            .input-container button {
+                font-size: 14px;
+            }
+            .background-setting-area {
+                display: block;
+            }
+        }
+        @media (min-width: 601px) {
+            .background-setting-area {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -129,8 +138,6 @@
 </div>
 
 <script>
-    let editingIndex = null;
-
     function loadMessages() {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
         const chatContainer = document.getElementById('chatContainer');
@@ -199,7 +206,6 @@
 
     function saveMessage(message) {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
-
         messages.push(message);
         localStorage.setItem('messages', JSON.stringify(messages));
         loadMessages();
@@ -227,6 +233,11 @@
     window.onload = function() {
         loadMessages();
         loadBackgroundImage();
+
+        // スマホの場合、特定のスタイルや機能を適用
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            document.querySelector('.background-setting-area').style.display = 'block';
+        }
     };
 
     document.getElementById('bgImageInput').addEventListener('change', setBackgroundImage);
@@ -234,4 +245,3 @@
 
 </body>
 </html>
-
